@@ -1,6 +1,5 @@
 package com.rachid.ft_hangouts.screens
 
-import AddContactFloatingActionButton
 import android.graphics.Color
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,13 +14,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import com.rachid.ft_hangouts.R
+import com.rachid.ft_hangouts.components.AddContactFloatingActionButton
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
     Scaffold(
-        floatingActionButton = {AddContactFloatingActionButton(
-           navController = navController
-        )}
+        floatingActionButton = {
+            AddContactFloatingActionButton(
+               navController = navController
+            )
+        }
     ) { innerPadding: PaddingValues ->
         Box(
             modifier = Modifier
