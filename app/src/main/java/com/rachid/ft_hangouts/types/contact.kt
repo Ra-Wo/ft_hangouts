@@ -7,4 +7,13 @@ data class Contact(
     val phoneNumber: String,
     val email: String,
     val address: String,
-)
+) {
+    override fun toString(): String {
+        return "Id: $id\n" +
+                "First Name: $firstName\n" +
+                "Last Name: $lastName\n" +
+                "Phone Number: $phoneNumber\n" +
+                "Email: $email\n" +
+                "Address: $address"
+    }
+}

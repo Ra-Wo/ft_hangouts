@@ -34,7 +34,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Ft_hangoutsTheme {
-
                 App()
             }
         }
