@@ -45,10 +45,12 @@ import com.rachid.ft_hangouts.components.TopBar
 import com.rachid.ft_hangouts.types.Contact
 import java.util.UUID
 import com.rachid.ft_hangouts.R
+import com.rachid.ft_hangouts.db.ContactDatabaseHelper
 
 @Composable
 fun AddContactScreen(navController: NavHostController) {
 
+    // state for the contact
     val contact = remember {
         mutableStateOf(
             Contact(
@@ -60,6 +62,24 @@ fun AddContactScreen(navController: NavHostController) {
                 address = ""
             )
         )
+    }
+
+    fun handleSaveContact() {
+        val dbHelper = ContactDatabaseHelper(navController.context)
+        val db = dbHelper.writableDatabase
+
+        // Insert the contact into the database
+        dbHelper.insertContact(db, contact.value)
+
+        // Show a toast message
+        Toast.makeText(
+            navController.context,
+            "Contact saved!",
+            Toast.LENGTH_SHORT
+        ).show()
+
+        // Navigate back to the home screen
+        navController.popBackStack()
     }
 
     Scaffold(
@@ -94,13 +114,7 @@ fun AddContactScreen(navController: NavHostController) {
                             .padding(end = 16.dp)
                     ) {
                         Button(
-                            onClick = {
-                                Toast.makeText(
-                                    navController.context,
-                                    "Contact saved!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            },
+                            onClick = { handleSaveContact() },
                             modifier = Modifier
                         ) {
                             Text("Save", style = MaterialTheme.typography.labelLarge)
@@ -180,9 +194,6 @@ fun AddContactScreen(navController: NavHostController) {
                         .fillMaxWidth()
                         .padding(bottom = 24.dp),
                     shape = RoundedCornerShape(18.dp),
-                )
-                Text(
-                    text = contact.value.toString()
                 )
             }
         }
