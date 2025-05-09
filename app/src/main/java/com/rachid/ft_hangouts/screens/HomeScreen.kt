@@ -1,60 +1,49 @@
 package com.rachid.ft_hangouts.screens
 
-import android.database.sqlite.SQLiteDatabase
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
-import com.rachid.ft_hangouts.components.AddContactFloatingActionButton
+import com.rachid.ft_hangouts.components.AddContactFAB
 import com.rachid.ft_hangouts.components.TopBar
-import com.rachid.ft_hangouts.db.ContactDatabaseHelper
+import com.rachid.ft_hangouts.db.DatabaseHelper
 import com.rachid.ft_hangouts.R
+import com.rachid.ft_hangouts.components.CustomAlertDialog
+import com.rachid.ft_hangouts.components.EmptyContactsScreen
 import com.rachid.ft_hangouts.types.Contact
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
 
     // get all contacts from the database
-    val db = ContactDatabaseHelper(context = navController.context)
+    val db = DatabaseHelper(context = navController.context)
     val dbHelper = db.readableDatabase
     var contacts = db.getAllContacts(dbHelper)
 
@@ -65,7 +54,7 @@ fun HomeScreen(navController: NavHostController) {
             )
         },
         floatingActionButton = {
-            AddContactFloatingActionButton(
+            AddContactFAB(
                 navController = navController
             )
         },
@@ -89,34 +78,17 @@ fun HomeScreen(navController: NavHostController) {
     }
 }
 
-@Composable
-fun EmptyContactsScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "No contacts found",
-            style = MaterialTheme.typography.titleLarge,
-            fontSize = 20.sp,
-            color = Color.Gray
-        )
-    }
-}
+
 
 @Composable
-fun ContactsList(contacts: MutableList<Contact>, db: ContactDatabaseHelper, navController: NavHostController) {
+fun ContactsList(contacts: MutableList<Contact>, db: DatabaseHelper, navController: NavHostController) {
     val dbHelper = db.readableDatabase
     val openAlertDialog = remember { mutableStateOf(false) }
     var contactToDelete = remember { mutableStateOf<Contact?>(null) }
 
     when {
-        // ...
         openAlertDialog.value -> {
-            AlertDialog(
+            CustomAlertDialog(
                 onDismissRequest = {
                     openAlertDialog.value = false
                     contactToDelete.value = null
@@ -153,10 +125,11 @@ fun ContactsList(contacts: MutableList<Contact>, db: ContactDatabaseHelper, navC
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .padding(16.dp)
-                    .clickable(enabled = true, onClick = {})
-            ) {
+                    .clickable(enabled = true, onClick = {
 
+                    })
+                    .padding(16.dp)
+            ) {
                 // avatar
                 Box(
                     modifier = Modifier
@@ -217,7 +190,13 @@ fun ContactsList(contacts: MutableList<Contact>, db: ContactDatabaseHelper, navC
                         onDismissRequest = { isOptionsExpanded.value = false },
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Delete") },
+                            text = { Text("Edit Contact") },
+                            onClick = {
+                                navController.navigate("Edit Contact/${contact.id}")
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Delete Contact") },
                             onClick = {
                                 // set the contact to delete
                                 contactToDelete.value = contact
@@ -232,46 +211,4 @@ fun ContactsList(contacts: MutableList<Contact>, db: ContactDatabaseHelper, navC
             }
         }
     }
-}
-
-@Composable
-fun AlertDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-    dialogTitle: String,
-    dialogText: String,
-    icon: ImageVector,
-) {
-    AlertDialog(
-        icon = {
-            Icon(icon, contentDescription = "Example Icon")
-        },
-        title = {
-            Text(text = dialogTitle)
-        },
-        text = {
-            Text(text = dialogText)
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirmation()
-                }
-            ) {
-                Text("Confirm")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text("Dismiss")
-            }
-        }
-    )
 }

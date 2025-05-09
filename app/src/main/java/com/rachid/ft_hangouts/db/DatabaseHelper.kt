@@ -4,13 +4,12 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.util.Log
 import com.rachid.ft_hangouts.types.Contact
 
 const val DATABASE_VERSION = 1
 const val DATABASE_NAME = "contacts.db"
 
-class ContactDatabaseHelper(context: Context) :
+class DatabaseHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
@@ -99,5 +98,48 @@ class ContactDatabaseHelper(context: Context) :
             "$COLUMN_ID = ?",
             arrayOf(contactId)
         )
+    }
+
+    fun editContact(db: SQLiteDatabase, contact: Contact) {
+        val values = ContentValues().apply {
+            put(COLUMN_FIRST_NAME, contact.firstName)
+            put(COLUMN_LAST_NAME, contact.lastName)
+            put(COLUMN_PHONE_NUMBER, contact.phoneNumber)
+            put(COLUMN_EMAIL, contact.email)
+            put(COLUMN_ADDRESS, contact.address)
+        }
+        db.update(
+            TABLE_NAME,
+            values,
+            "$COLUMN_ID = ?",
+            arrayOf(contact.id)
+        )
+    }
+
+    fun getContactById(db: SQLiteDatabase, contactId: String): Contact? {
+        val cursor = db.query(
+            TABLE_NAME,
+            null,
+            "$COLUMN_ID = ?",
+            arrayOf(contactId),
+            null,
+            null,
+            null
+        )
+
+        return if (cursor.moveToFirst()) {
+            val id = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID))
+            val firstName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FIRST_NAME))
+            val lastName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LAST_NAME))
+            val phoneNumber = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE_NUMBER))
+            val email = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL))
+            val address = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ADDRESS))
+
+            Contact(id, firstName, lastName, phoneNumber, email, address)
+        } else {
+            null
+        }.also {
+            cursor.close()
+        }
     }
 }

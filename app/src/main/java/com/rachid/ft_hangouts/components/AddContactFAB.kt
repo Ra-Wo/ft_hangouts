@@ -8,9 +8,11 @@ import androidx.navigation.NavHostController
 import com.rachid.ft_hangouts.R
 
 @Composable
-fun AddContactFloatingActionButton(navController: NavHostController) {
+fun AddContactFAB(navController: NavHostController) {
     FloatingActionButton(
-        onClick = { navController.navigate("Add Contact") },
+        onClick = {
+            navController.navigate("Add Contact")
+        },
     ) {
         Icon(
             painter = painterResource(R.drawable.add_contact),
