@@ -31,14 +31,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.rachid.ft_hangouts.components.TopBar
-import com.rachid.ft_hangouts.types.Contact
-import java.util.UUID
-import com.rachid.ft_hangouts.R
+import com.rachid.ft_hangouts.dataClasses.Contact
 import com.rachid.ft_hangouts.db.DatabaseHelper
+import com.rachid.ft_hangouts.R
 
 @Composable
 fun ContactFormScreen(navController: NavHostController, contactId: String? = null) {
@@ -50,7 +50,6 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
     val contact = remember {
         mutableStateOf(
             db.getContactById(dbHelper, contactId.toString()) ?: Contact(
-                id = UUID.randomUUID().toString(),
                 firstName = "",
                 lastName = "",
                 phoneNumber = "",
@@ -87,8 +86,8 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
         topBar = {
             TopBar(
                 title = when (contactId) {
-                    null -> "Add Contact"
-                    else -> "Edit Contact"
+                    null -> stringResource(id = R.string.add_contact)
+                    else -> stringResource(id = R.string.edit_contact)
                 },
                 startContent = {
                     Box(
@@ -101,27 +100,30 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.back_icon),
-                            contentDescription = "Back",
+                            contentDescription = stringResource(
+                                id = R.string.back
+                            ),
                             modifier = Modifier
                                 .size(35.dp)
                                 .padding(4.dp),
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
-                    Spacer(modifier = Modifier.width(6.dp))
                 },
                 endContent = {
                     Row(
                         horizontalArrangement = Arrangement.End,
                         modifier = Modifier
-                            .fillMaxWidth()
                             .padding(end = 16.dp)
                     ) {
                         Button(
                             onClick = { handleSaveContact() },
                             modifier = Modifier
                         ) {
-                            Text("Save", style = MaterialTheme.typography.labelLarge)
+                            Text(
+                                stringResource(id = R.string.save),
+                                style = MaterialTheme.typography.labelLarge
+                            )
                         }
                     }
                 }
@@ -149,7 +151,7 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
                     onValueChange = { value ->
                         contact.value = contact.value.copy(firstName = value)
                     },
-                    label = { Text("First Name") },
+                    label = { Text(stringResource(R.string.first_name)) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -162,7 +164,7 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
                     onValueChange = { value ->
                         contact.value = contact.value.copy(lastName = value)
                     },
-                    label = { Text("Last Name") },
+                    label = { Text(stringResource(R.string.last_name)) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -175,7 +177,7 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
                     onValueChange = { value ->
                         contact.value = contact.value.copy(phoneNumber = value)
                     },
-                    label = { Text("Phone Number") },
+                    label = { Text(stringResource(R.string.phone_number)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     singleLine = true,
                     modifier = Modifier
@@ -187,7 +189,7 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
                 OutlinedTextField(
                     value = contact.value.email,
                     onValueChange = { value -> contact.value = contact.value.copy(email = value) },
-                    label = { Text("Email") },
+                    label = { Text(stringResource(R.string.Email)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     singleLine = true,
                     modifier = Modifier
@@ -201,28 +203,11 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
                     onValueChange = { value ->
                         contact.value = contact.value.copy(address = value)
                     },
-                    label = { Text("Address") },
+                    label = { Text(stringResource(R.string.Address)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 24.dp),
                     shape = RoundedCornerShape(18.dp),
-                )
-
-                Text(
-                    text = contact.value.toString(),
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp),
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                Text(
-                    text = contactId.toString(),
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp),
-                    color = MaterialTheme.colorScheme.secondary
                 )
             }
         }

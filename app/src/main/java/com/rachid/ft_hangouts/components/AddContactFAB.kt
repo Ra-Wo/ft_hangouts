@@ -4,6 +4,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import com.rachid.ft_hangouts.R
 
@@ -15,8 +16,8 @@ fun AddContactFAB(navController: NavHostController) {
         },
     ) {
         Icon(
-            painter = painterResource(R.drawable.add_contact),
-            contentDescription = "Add Contact",
+            painter = painterResource(R.drawable.add_contact_icon),
+            contentDescription = stringResource(R.string.add_contact)
         )
     }
 }

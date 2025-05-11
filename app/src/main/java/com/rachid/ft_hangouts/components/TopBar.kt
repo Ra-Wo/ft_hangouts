@@ -16,16 +16,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.rachid.ft_hangouts.R
 
 @Composable
 fun TopBar(
     startContent: @Composable (() -> Unit)? = null,
     endContent: @Composable (() -> Unit)? = null,
-    title: String = "Home",
+    title: String = stringResource(R.string.home),
 ) {
     Scaffold(
-        modifier = Modifier.fillMaxWidth().height(100.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp)
     ) { innerPadding: PaddingValues ->
         Box(
             modifier = Modifier
@@ -38,7 +43,7 @@ fun TopBar(
                 Spacer(
                     modifier = Modifier.height(innerPadding.calculateTopPadding())
                 )
-                Row (
+                Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .padding(13.dp)
@@ -52,7 +57,10 @@ fun TopBar(
                     Text(
                         text = title,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        style = MaterialTheme.typography.titleLarge,
+                        fontSize = 20.sp,
+                        modifier = Modifier
+                            .padding(start = if (startContent != null) 8.dp else 16.dp)
+                            .weight(1f)
                     )
                     // add the end content
                     if (endContent != null) {

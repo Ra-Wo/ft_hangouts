@@ -1,7 +1,9 @@
-package com.rachid.ft_hangouts.types
+package com.rachid.ft_hangouts.dataClasses
+
+import java.util.UUID
 
 data class Contact(
-    val id: String,
+    val id: String = UUID.randomUUID().toString(),
     val firstName: String,
     val lastName: String,
     val phoneNumber: String,
