@@ -223,7 +223,6 @@ fun MessagesScreen(navController: NavHostController, contactId: String) {
                 .fillMaxWidth()
                 .fillMaxHeight()
         ) {
-
             if (messages.value.isNotEmpty()) {
                 LazyColumn(
                     modifier = Modifier
@@ -244,10 +243,3 @@ fun MessagesScreen(navController: NavHostController, contactId: String) {
         }
     }
 }
-
-
-
-
-
-
-
