@@ -78,13 +78,12 @@ fun ContactItem(
                 color = MaterialTheme.colorScheme.secondary
             )
         }
-
         Box(
             modifier = Modifier
                 .padding(start = 8.dp)
                 .size(45.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.inverseOnSurface)
+                .background(if (contact.newMessages >= 1) MaterialTheme.colorScheme.primary else Color.Transparent)
                 .padding(2.dp)
                 .clickable(true, onClick = {
                     navController.navigate("Messages/${contact.id}")
@@ -97,7 +96,7 @@ fun ContactItem(
                     text = if (contact.newMessages > 9) "9+" else contact.newMessages.toString(),
                     style = MaterialTheme.typography.titleLarge,
                     fontSize = 10.sp,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onPrimary,
                 )
             }
             Icon(
@@ -106,7 +105,7 @@ fun ContactItem(
                 modifier = Modifier
                     .padding(4.dp)
                     .size(40.dp),
-                tint = MaterialTheme.colorScheme.onSurface
+                tint = if (contact.newMessages >= 1) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
             )
         }
     }

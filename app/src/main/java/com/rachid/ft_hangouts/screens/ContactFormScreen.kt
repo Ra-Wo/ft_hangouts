@@ -1,19 +1,16 @@
 package com.rachid.ft_hangouts.screens
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,10 +33,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.rachid.ft_hangouts.R
 import com.rachid.ft_hangouts.components.TopBar
 import com.rachid.ft_hangouts.dataClasses.Contact
 import com.rachid.ft_hangouts.db.DatabaseHelper
-import com.rachid.ft_hangouts.R
 
 @Composable
 fun ContactFormScreen(navController: NavHostController, contactId: String? = null) {
@@ -65,6 +62,19 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
         val dbHelper = DatabaseHelper(navController.context)
         val db = dbHelper.writableDatabase
 
+        if (
+            contact.value.firstName.isEmpty()
+            || contact.value.lastName.isEmpty()
+            || contact.value.phoneNumber.isEmpty()
+        ) {
+            Toast.makeText(
+                navController.context,
+                "Please fill in all fields",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
         if (contactId != null) {
             // Update the contact in the database
             dbHelper.editContact(db, contact.value)
@@ -82,6 +92,10 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
 
         // Navigate back to the home screen
         navController.popBackStack()
+    }
+
+    fun formatText(text: String): String {
+        return text.trim()
     }
 
     Scaffold(
@@ -150,7 +164,7 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
                 OutlinedTextField(
                     value = contact.value.firstName,
                     onValueChange = { value ->
-                        contact.value = contact.value.copy(firstName = value)
+                        contact.value = contact.value.copy(firstName = formatText(value))
                     },
                     label = { Text(stringResource(R.string.first_name)) },
                     singleLine = true,

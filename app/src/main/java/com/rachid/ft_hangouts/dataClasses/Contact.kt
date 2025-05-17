@@ -4,11 +4,11 @@ import java.util.UUID
 
 data class Contact(
     val id: String = UUID.randomUUID().toString(),
-    val firstName: String,
-    val lastName: String,
-    val phoneNumber: String,
-    val email: String,
-    val address: String,
+    var firstName: String,
+    var lastName: String,
+    var phoneNumber: String,
+    var email: String,
+    var address: String,
     var newMessages: Int,
 ) {
     override fun toString(): String {

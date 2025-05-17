@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
-import com.rachid.ft_hangouts.dataClasses.Contact
 import com.rachid.ft_hangouts.db.DatabaseHelper
 
 class SmsReceiver : BroadcastReceiver() {

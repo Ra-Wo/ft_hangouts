@@ -64,7 +64,7 @@ fun ContactsListScreen(navController: NavHostController) {
             // Display the list of contacts
             if (contacts.isNotEmpty()) {
                 // Display the list of contacts
-                ContactsList(contacts = contacts, db = db, navController = navController)
+                ContactsList(contacts = contacts, navController = navController)
             }
             // If there are no contacts, display an empty screen
             else {
@@ -74,11 +74,9 @@ fun ContactsListScreen(navController: NavHostController) {
     }
 }
 
-
 @Composable
 fun ContactsList(
     contacts: MutableList<Contact>,
-    db: DatabaseHelper,
     navController: NavHostController
 ) {
     LazyColumn {

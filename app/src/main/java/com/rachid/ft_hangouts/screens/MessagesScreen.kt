@@ -1,13 +1,10 @@
 package com.rachid.ft_hangouts.screens
 
-import android.app.Activity
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.telephony.SmsManager
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -97,6 +94,19 @@ fun MessagesScreen(navController: NavHostController, contactId: String) {
             messages.value = listOf(message) + messages.value
         }
     }
+
+    // make the new messages counter in the contact 0
+    db.editContact(
+        db = dbHelper,
+        contact = contact?.copy(newMessages = 0) ?: Contact(
+            firstName = "",
+            lastName = "",
+            phoneNumber = "",
+            email = "",
+            address = "",
+            newMessages = 0
+        )
+    )
 
     // register the receiver to listen for new messages
     DisposableEffect(Unit) {
