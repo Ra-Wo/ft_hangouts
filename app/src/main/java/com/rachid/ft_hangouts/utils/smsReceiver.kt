@@ -4,9 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
-import android.util.Log
 import com.rachid.ft_hangouts.dataClasses.Contact
-import com.rachid.ft_hangouts.dataClasses.Message
 import com.rachid.ft_hangouts.db.DatabaseHelper
 
 class SmsReceiver : BroadcastReceiver() {
@@ -30,31 +28,18 @@ class SmsReceiver : BroadcastReceiver() {
             // Check if the sender is already in the database
             var contact = db.getContactByPhoneNumber(dbHelper, sender)
             if (contact == null) {
-                // If the sender is not in the database, add it
-                contact = Contact(
-                    firstName = sender,
-                    lastName = "",
-                    phoneNumber = sender,
-                    email = "",
-                    address = ""
-                )
-                db.insertContact(
-                    db = dbHelper,
-                    contact = contact
-                )
+                return
             }
+
+            // increment the unread message count
+            contact.newMessages = contact.newMessages + 1
+            db.editContact(
+                db = dbHelper,
+                contact = contact
+            )
 
             // Save the message to the database
             val fullMessage = messageBuilder.toString()
-            db.insertMessage(
-                db = dbHelper,
-                message = Message(
-                    contactId = contact.id,
-                    phoneNumber = sender,
-                    content = fullMessage,
-                    isOutgoing = false,
-                )
-            )
 
             // send local broadcast to update UI
             val localIntent = Intent("com.rachid.ft_hangouts.NEW_MESSAGE")

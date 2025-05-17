@@ -1,9 +1,13 @@
 package com.rachid.ft_hangouts.screens
 
+import android.app.Activity
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.telephony.SmsManager
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -35,15 +39,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
-import com.rachid.ft_hangouts.components.TopBar
-import com.rachid.ft_hangouts.db.DatabaseHelper
-import com.rachid.ft_hangouts.components.EmptyScreen
 import com.rachid.ft_hangouts.R
 import com.rachid.ft_hangouts.components.ContactDropdownMenu
 import com.rachid.ft_hangouts.components.CustomAlertDialog
+import com.rachid.ft_hangouts.components.EmptyScreen
 import com.rachid.ft_hangouts.components.MessageItem
+import com.rachid.ft_hangouts.components.TopBar
 import com.rachid.ft_hangouts.dataClasses.Contact
-import com.rachid.ft_hangouts.dataClasses.Message
+import com.rachid.ft_hangouts.db.DatabaseHelper
+import com.rachid.ft_hangouts.utils.SmsMessage
+import com.rachid.ft_hangouts.utils.SmsType
+import com.rachid.ft_hangouts.utils.getConversationWithNumber
 
 
 @Composable
@@ -57,11 +63,8 @@ fun MessagesScreen(navController: NavHostController, contactId: String) {
 
     // get all messages for the contact
     var messages = remember {
-        mutableStateOf<List<Message>>(
-            db.getMessagesForContactId(
-                dbHelper,
-                contactId
-            )
+        mutableStateOf<List<SmsMessage>>(
+            getConversationWithNumber(navController.context, contact?.phoneNumber ?: "Unknown")
         )
     }
 
@@ -71,28 +74,49 @@ fun MessagesScreen(navController: NavHostController, contactId: String) {
     // handle send message
     fun handleSendMessage() {
         if (newMessage.value.isNotEmpty()) {
-            val message = Message(
-                contactId = contactId,
-                content = newMessage.value,
-                timestamp = System.currentTimeMillis(),
-                isOutgoing = true,
-                isRead = true,
-                phoneNumber = contact?.phoneNumber ?: "Unknown"
+
+            val message = SmsMessage(
+                sender = "me",
+                body = newMessage.value,
+                date = System.currentTimeMillis(),
+                type = SmsType.SENT
             )
-            db.insertMessage(dbHelper, message)
-            messages.value = listOf(message) + messages.value
+
+            // send sms
+            val smsManager = SmsManager.getDefault()
+            smsManager.sendTextMessage(
+                contact?.phoneNumber, // phone number
+                null, // scAddress
+                newMessage.value, // message body
+                null, // sentIntent
+                null // deliveryIntent
+            )
             newMessage.value = ""
+
+            // add the message to the list
+            messages.value = listOf(message) + messages.value
         }
     }
-
 
     // register the receiver to listen for new messages
     DisposableEffect(Unit) {
         // register the receiver
         val smsReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                val newMessages = db.getMessagesForContactId(dbHelper, contactId)
-                messages.value = newMessages
+                val contactId = intent.getStringExtra("contactId")
+                val message = intent.getStringExtra("message")
+
+                if (contactId != null && message != null && contactId == contact?.id) {
+                    // add the message to the list
+                    messages.value = listOf(
+                        SmsMessage(
+                            sender = contact.phoneNumber,
+                            body = message,
+                            date = System.currentTimeMillis(),
+                            type = SmsType.RECEIVED
+                        )
+                    ) + messages.value
+                }
             }
         }
 
@@ -110,7 +134,6 @@ fun MessagesScreen(navController: NavHostController, contactId: String) {
             navController.context.unregisterReceiver(smsReceiver)
         }
     }
-
 
     // delete contact functionality
     val openAlertDialog = remember { mutableStateOf(false) }
@@ -144,14 +167,6 @@ fun MessagesScreen(navController: NavHostController, contactId: String) {
                 icon = Icons.Default.Delete
             )
         }
-    }
-
-    // mark all messages as read
-    if (contact != null) {
-        db.markMessagesAsReadForContact(
-            dbHelper,
-            contact.id
-        )
     }
 
     Scaffold(

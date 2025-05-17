@@ -2,7 +2,6 @@ package com.rachid.ft_hangouts.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,10 +13,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -25,34 +23,15 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.rachid.ft_hangouts.R
 import com.rachid.ft_hangouts.dataClasses.Contact
-import com.rachid.ft_hangouts.dataClasses.Message
 
 @Composable
 fun ContactItem(
-    navController: NavHostController,
-    contact: Contact,
-    unreadMessages: List<Message>
+    navController: NavHostController, contact: Contact
 ) {
-    val unreadCount = unreadMessages.size
-    val lastMessage = if (unreadCount > 0) {
-        unreadMessages[0]
-    } else {
-        null
-    }
-    var lastMessageContent = if (lastMessage != null) {
-        if (lastMessage.content.length > 80) {
-            "${lastMessage.content.substring(0, 80)}..."
-        } else {
-            lastMessage.content
-        }
-    } else {
-        contact.phoneNumber
-    }
-
     Row(
         modifier = Modifier
             .clickable(enabled = true, onClick = {
-                navController.navigate("Messages/${contact.id}")
+                navController.navigate("Edit Contact/${contact.id}")
             })
             .padding(16.dp)
     ) {
@@ -93,24 +72,41 @@ fun ContactItem(
                 fontSize = 19.sp,
             )
             Text(
-                text = lastMessageContent,
+                text = contact.phoneNumber,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.secondary
             )
         }
 
-        // unread messages count
-        if (unreadCount > 0) {
-            Text(
-                text = unreadCount.toString(),
+        Box(
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .size(45.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.inverseOnSurface)
+                .padding(2.dp)
+                .clickable(true, onClick = {
+                    navController.navigate("Messages/${contact.id}")
+                }),
+            contentAlignment = androidx.compose.ui.Alignment.Center
+
+        ) {
+            if (contact.newMessages >= 1) {
+                Text(
+                    text = if (contact.newMessages > 9) "9+" else contact.newMessages.toString(),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Icon(
+                painter = painterResource(R.drawable.chat_bubble),
+                contentDescription = "",
                 modifier = Modifier
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-                    .padding(horizontal = 6.dp),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontSize = 14.sp
+                    .padding(4.dp)
+                    .size(40.dp),
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
     }

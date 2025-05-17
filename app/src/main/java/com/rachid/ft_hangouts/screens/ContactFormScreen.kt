@@ -1,6 +1,7 @@
 package com.rachid.ft_hangouts.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,7 +55,8 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
                 lastName = "",
                 phoneNumber = "",
                 email = "",
-                address = ""
+                address = "",
+                newMessages = 0
             )
         )
     }
@@ -118,7 +120,6 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
                     ) {
                         Button(
                             onClick = { handleSaveContact() },
-                            modifier = Modifier
                         ) {
                             Text(
                                 stringResource(id = R.string.save),

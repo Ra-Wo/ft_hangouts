@@ -4,11 +4,9 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.util.Log
 import com.rachid.ft_hangouts.dataClasses.Contact
-import com.rachid.ft_hangouts.dataClasses.Message
 
-const val DATABASE_VERSION = 1
+const val DATABASE_VERSION = 2
 const val DATABASE_NAME = "ft_hangout.db"
 
 class DatabaseHelper(context: Context) :
@@ -23,16 +21,7 @@ class DatabaseHelper(context: Context) :
         const val COLUMN_PHONE_NUMBER = "phone_number"
         const val COLUMN_EMAIL = "email"
         const val COLUMN_ADDRESS = "address"
-
-        // Messages table
-        const val TABLE_MESSAGES = "messages"
-        const val COLUMN_MESSAGE_ID = "id"
-        const val COLUMN_CONTACT_ID = "contact_id"
-        const val COLUMN_MESSAGE_PHONE_NUMBER = "phone_number"
-        const val COLUMN_MESSAGE_CONTENT = "content"
-        const val COLUMN_MESSAGE_TIMESTAMP = "timestamp"
-        const val COLUMN_MESSAGE_IS_OUTGOING = "is_outgoing"
-        const val COLUMN_MESSAGE_IS_READ = "is_read"
+        const val COLUMN_NEW_MESSAGES = "new_messages"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -44,28 +33,14 @@ class DatabaseHelper(context: Context) :
                 $COLUMN_LAST_NAME TEXT,
                 $COLUMN_PHONE_NUMBER TEXT,
                 $COLUMN_EMAIL TEXT,
-                $COLUMN_ADDRESS TEXT
-            )
-            """.trimIndent()
-        )
-        db.execSQL(
-            """
-            CREATE TABLE $TABLE_MESSAGES (
-                $COLUMN_MESSAGE_ID TEXT PRIMARY KEY,
-                $COLUMN_CONTACT_ID TEXT,
-                $COLUMN_MESSAGE_PHONE_NUMBER TEXT,
-                $COLUMN_MESSAGE_CONTENT TEXT,
-                $COLUMN_MESSAGE_TIMESTAMP INTEGER,
-                $COLUMN_MESSAGE_IS_OUTGOING INTEGER,
-                $COLUMN_MESSAGE_IS_READ INTEGER,
-                FOREIGN KEY ($COLUMN_CONTACT_ID) REFERENCES $TABLE_NAME($COLUMN_ID)
+                $COLUMN_ADDRESS TEXT,
+                $COLUMN_NEW_MESSAGES INTEGER DEFAULT 0
             )
             """.trimIndent()
         )
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_MESSAGES")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
         onCreate(db)
     }
@@ -79,6 +54,7 @@ class DatabaseHelper(context: Context) :
             put(COLUMN_PHONE_NUMBER, contact.phoneNumber)
             put(COLUMN_EMAIL, contact.email)
             put(COLUMN_ADDRESS, contact.address)
+            put(COLUMN_NEW_MESSAGES, contact.newMessages)
         }
         db.insert(TABLE_NAME, null, values)
     }
@@ -103,16 +79,12 @@ class DatabaseHelper(context: Context) :
             val phoneNumber = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE_NUMBER))
             val email = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL))
             val address = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ADDRESS))
+            val newMessages = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_NEW_MESSAGES))
 
             // Create a new Contact object and add it to the list
             contacts.add(
                 Contact(
-                    id,
-                    firstName,
-                    lastName,
-                    phoneNumber,
-                    email,
-                    address
+                    id, firstName, lastName, phoneNumber, email, address, newMessages
                 )
             )
         }
@@ -122,11 +94,6 @@ class DatabaseHelper(context: Context) :
     }
 
     fun deleteContact(db: SQLiteDatabase, contactId: String) {
-        db.delete(
-            TABLE_MESSAGES,
-            "$COLUMN_CONTACT_ID = ?",
-            arrayOf(contactId)
-        )
         db.delete(
             TABLE_NAME,
             "$COLUMN_ID = ?",
@@ -141,6 +108,7 @@ class DatabaseHelper(context: Context) :
             put(COLUMN_PHONE_NUMBER, contact.phoneNumber)
             put(COLUMN_EMAIL, contact.email)
             put(COLUMN_ADDRESS, contact.address)
+            put(COLUMN_NEW_MESSAGES, contact.newMessages)
         }
         db.update(
             TABLE_NAME,
@@ -168,8 +136,9 @@ class DatabaseHelper(context: Context) :
             val phoneNumber = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PHONE_NUMBER))
             val email = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL))
             val address = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ADDRESS))
+            val newMessages = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_NEW_MESSAGES))
 
-            Contact(id, firstName, lastName, phoneNumber, email, address)
+            Contact(id, firstName, lastName, phoneNumber, email, address, newMessages)
         } else {
             null
         }.also {
@@ -194,113 +163,13 @@ class DatabaseHelper(context: Context) :
             val lastName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LAST_NAME))
             val email = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL))
             val address = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ADDRESS))
+            val newMessages = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_NEW_MESSAGES))
 
-            Contact(id, firstName, lastName, phoneNumber, email, address)
+            Contact(id, firstName, lastName, phoneNumber, email, address, newMessages)
         } else {
             null
         }.also {
             cursor.close()
         }
-    }
-
-    // Message operations
-    fun insertMessage(db: SQLiteDatabase, message: Message) {
-        val values = ContentValues().apply {
-            put(COLUMN_MESSAGE_ID, message.id)
-            put(COLUMN_CONTACT_ID, message.contactId)
-            put(COLUMN_MESSAGE_PHONE_NUMBER, message.phoneNumber)
-            put(COLUMN_MESSAGE_CONTENT, message.content)
-            put(COLUMN_MESSAGE_TIMESTAMP, message.timestamp)
-            put(COLUMN_MESSAGE_IS_OUTGOING, if (message.isOutgoing) 1 else 0)
-            put(COLUMN_MESSAGE_IS_READ, if (message.isRead) 1 else 0)
-        }
-        db.insert(TABLE_MESSAGES, null, values)
-    }
-
-    fun getMessagesForContactId(db: SQLiteDatabase, contactId: String): MutableList<Message> {
-        val messages = mutableListOf<Message>()
-        val cursor = db.query(
-            TABLE_MESSAGES,
-            null,
-            "$COLUMN_CONTACT_ID = ?",
-            arrayOf(contactId),
-            null,
-            null,
-            "$COLUMN_MESSAGE_TIMESTAMP DESC"
-        )
-
-        while (cursor.moveToNext()) {
-            val id = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_ID))
-            val phoneNumber = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_PHONE_NUMBER))
-            val content = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_CONTENT))
-            val timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_TIMESTAMP))
-            val isOutgoing = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_IS_OUTGOING)) == 1
-            val isRead = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_IS_READ)) == 1
-
-            messages.add(
-                Message(
-                    id,
-                    contactId,
-                    phoneNumber,
-                    content,
-                    timestamp,
-                    isOutgoing,
-                    isRead
-                )
-            )
-        }
-
-        cursor.close()
-        return messages
-    }
-
-    fun getUnreadMessages(db: SQLiteDatabase): MutableList<Message> {
-        val messages = mutableListOf<Message>()
-        val cursor = db.query(
-            TABLE_MESSAGES,
-            null,
-            "$COLUMN_MESSAGE_IS_READ = ?",
-            arrayOf("0"),
-            null,
-            null,
-            "$COLUMN_MESSAGE_TIMESTAMP DESC"
-        )
-
-        while (cursor.moveToNext()) {
-            val id = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_ID))
-            val contactId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT_ID))
-            val phoneNumber = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_PHONE_NUMBER))
-            val content = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_CONTENT))
-            val timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_TIMESTAMP))
-            val isOutgoing = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_IS_OUTGOING)) == 1
-            val isRead = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_IS_READ)) == 1
-
-            messages.add(
-                Message(
-                    id,
-                    contactId,
-                    phoneNumber,
-                    content,
-                    timestamp,
-                    isOutgoing,
-                    isRead
-                )
-            )
-        }
-
-        cursor.close()
-        return messages
-    }
-
-    fun markMessagesAsReadForContact(db: SQLiteDatabase, contactId: String) {
-        val values = ContentValues().apply {
-            put(COLUMN_MESSAGE_IS_READ, 1)
-        }
-        db.update(
-            TABLE_MESSAGES,
-            values,
-            "$COLUMN_CONTACT_ID = ? AND $COLUMN_MESSAGE_IS_READ = ?",
-            arrayOf(contactId, "0")
-        )
     }
 }

@@ -9,6 +9,7 @@ data class Contact(
     val phoneNumber: String,
     val email: String,
     val address: String,
+    var newMessages: Int,
 ) {
     override fun toString(): String {
         return "Id: $id\n" +
