@@ -96,17 +96,12 @@ fun MessagesScreen(navController: NavHostController, contactId: String) {
     }
 
     // make the new messages counter in the contact 0
-    db.editContact(
-        db = dbHelper,
-        contact = contact?.copy(newMessages = 0) ?: Contact(
-            firstName = "",
-            lastName = "",
-            phoneNumber = "",
-            email = "",
-            address = "",
-            newMessages = 0
+    if (contact != null) {
+        db.editContact(
+            db = dbHelper,
+            contact = contact.copy(newMessages = 0)
         )
-    )
+    }
 
     // register the receiver to listen for new messages
     DisposableEffect(Unit) {

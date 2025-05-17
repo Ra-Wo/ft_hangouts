@@ -1,5 +1,10 @@
 package com.rachid.ft_hangouts.screens
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,10 +16,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.rachid.ft_hangouts.R
 import com.rachid.ft_hangouts.components.AddContactFAB
@@ -26,10 +35,37 @@ import com.rachid.ft_hangouts.db.DatabaseHelper
 
 @Composable
 fun ContactsListScreen(navController: NavHostController) {
-    // get all contacts from the database
     val db = DatabaseHelper(context = navController.context)
     val dbHelper = db.readableDatabase
-    var contacts = db.getAllContacts(dbHelper)
+    var contacts = remember {
+        mutableStateOf<List<Contact>>(db.getAllContacts(dbHelper))
+    }
+
+    // register the receiver to listen for new messages
+    DisposableEffect(Unit) {
+        // register the receiver
+        val smsReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val contactId = intent.getStringExtra("contactId")
+                contacts.value = db.getAllContacts(dbHelper)
+                Log.d("ContactsListScreen01", "New message received for contact: $contactId")
+            }
+        }
+
+        // register the receiver
+        val filter = IntentFilter("com.rachid.ft_hangouts.NEW_MESSAGE")
+        ContextCompat.registerReceiver(
+            navController.context,
+            smsReceiver,
+            filter,
+            ContextCompat.RECEIVER_EXPORTED
+        )
+
+        // unregister the receiver when the composable is disposed
+        onDispose {
+            navController.context.unregisterReceiver(smsReceiver)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -62,9 +98,9 @@ fun ContactsListScreen(navController: NavHostController) {
                 .fillMaxHeight()
         ) {
             // Display the list of contacts
-            if (contacts.isNotEmpty()) {
+            if (contacts.value.isNotEmpty()) {
                 // Display the list of contacts
-                ContactsList(contacts = contacts, navController = navController)
+                ContactsList(contacts = contacts.value, navController = navController)
             }
             // If there are no contacts, display an empty screen
             else {
@@ -76,7 +112,7 @@ fun ContactsListScreen(navController: NavHostController) {
 
 @Composable
 fun ContactsList(
-    contacts: MutableList<Contact>,
+    contacts: List<Contact>,
     navController: NavHostController
 ) {
     LazyColumn {
