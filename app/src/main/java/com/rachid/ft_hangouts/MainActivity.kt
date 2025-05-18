@@ -2,7 +2,6 @@ package com.rachid.ft_hangouts
 
 import android.Manifest
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,7 +24,6 @@ import com.rachid.ft_hangouts.screens.SettingsScreen
 import com.rachid.ft_hangouts.ui.theme.Ft_hangoutsTheme
 import com.rachid.ft_hangouts.ui.theme.ThemeManager
 import com.rachid.ft_hangouts.ui.theme.ThemeType
-import com.rachid.ft_hangouts.utils.getConversationWithNumber
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
