@@ -94,10 +94,6 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
         navController.popBackStack()
     }
 
-    fun formatText(text: String): String {
-        return text.trim()
-    }
-
     Scaffold(
         topBar = {
             TopBar(
@@ -164,7 +160,7 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
                 OutlinedTextField(
                     value = contact.value.firstName,
                     onValueChange = { value ->
-                        contact.value = contact.value.copy(firstName = formatText(value))
+                        contact.value = contact.value.copy(firstName = value)
                     },
                     label = { Text(stringResource(R.string.first_name)) },
                     singleLine = true,

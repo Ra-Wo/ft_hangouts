@@ -83,10 +83,10 @@ fun MessagesScreen(navController: NavHostController, contactId: String) {
             val smsManager = SmsManager.getDefault()
             smsManager.sendTextMessage(
                 contact?.phoneNumber, // phone number
-                null, // scAddress
+                null, // scAddress **service center address**
                 newMessage.value, // message body
-                null, // sentIntent
-                null // deliveryIntent
+                null,
+                null
             )
             newMessage.value = ""
 
