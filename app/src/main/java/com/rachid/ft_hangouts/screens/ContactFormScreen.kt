@@ -75,6 +75,15 @@ fun ContactFormScreen(navController: NavHostController, contactId: String? = nul
             return
         }
 
+        if (dbHelper.getContactByPhoneNumber(db, contact.value.phoneNumber) != null) {
+            Toast.makeText(
+                navController.context,
+                "Contact with this phone number already exists",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
         if (contactId != null) {
             // Update the contact in the database
             dbHelper.editContact(db, contact.value)
