@@ -12,4 +12,4 @@ A contact management application.
 </p>
 
 ## subject
-(https://github.com/Ra-Wo/ft_hangouts/blob/main/en.subject.pdf)[https://github.com/Ra-Wo/ft_hangouts/blob/main/en.subject.pdf]
+[https://github.com/Ra-Wo/ft_hangouts/blob/main/en.subject.pdf]
